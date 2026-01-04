@@ -4,6 +4,15 @@ import { dataApi } from '@/lib/data-api';
 
 export type SortOption = 'newest' | 'importance' | 'priority';
 
+// Load collapseDuplicates from localStorage
+const getStoredCollapseDuplicates = (): boolean => {
+  try {
+    return localStorage.getItem('collapseDuplicates') === 'true';
+  } catch {
+    return true; // Default to collapsed
+  }
+};
+
 interface FeedState {
   // Data
   articles: Article[];
@@ -17,6 +26,7 @@ interface FeedState {
   categoryFilters: Category[];
   showHidden: boolean;
   sortBy: SortOption;
+  collapseDuplicates: boolean;
 
   // Pagination
   currentPage: number;
@@ -31,6 +41,7 @@ interface FeedState {
   toggleCategory: (category: Category) => void;
   toggleShowHidden: () => void;
   setSortBy: (sort: SortOption) => void;
+  setCollapseDuplicates: (collapse: boolean) => void;
   setPage: (page: number) => void;
   resetFilters: () => void;
 }
@@ -43,6 +54,7 @@ export const useFeedStore = create<FeedState>((set) => ({
   categoryFilters: [],
   showHidden: false,
   sortBy: 'newest',
+  collapseDuplicates: getStoredCollapseDuplicates(),
   currentPage: 1,
 
   loadArticles: async () => {
@@ -103,6 +115,15 @@ export const useFeedStore = create<FeedState>((set) => ({
 
   setSortBy: (sort) => {
     set({ sortBy: sort, currentPage: 1 });
+  },
+
+  setCollapseDuplicates: (collapse) => {
+    try {
+      localStorage.setItem('collapseDuplicates', collapse.toString());
+    } catch {
+      // Ignore localStorage errors
+    }
+    set({ collapseDuplicates: collapse, currentPage: 1 });
   },
 
   setPage: (page) => {

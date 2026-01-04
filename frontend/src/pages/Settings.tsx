@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ArrowLeft, X, Plus, Filter, Trash2, Loader2, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, X, Plus, Filter, Trash2, Loader2, LayoutGrid, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Header } from '@/components/Header';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useFeedStore } from '@/store/feedStore';
 
 const PAGE_SIZE_OPTIONS = [12, 18, 24, 30, 36, 42, 48] as const;
 
@@ -30,6 +32,8 @@ export function Settings({ signOut }: SettingsProps) {
     clearBlockedWords,
     setArticlesPerPage,
   } = useSettingsStore();
+
+  const { collapseDuplicates, setCollapseDuplicates } = useFeedStore();
 
   const blockedWords = preferences?.blockedWords ?? [];
   const articlesPerPage = preferences?.articlesPerPage ?? 12;
@@ -166,26 +170,46 @@ export function Settings({ signOut }: SettingsProps) {
             Customize how your feed is displayed.
           </p>
 
-          <div className="flex items-center justify-between">
-            <label className="font-display text-sm text-foreground">
-              Articles Per Page
-            </label>
-            <Select
-              value={articlesPerPage.toString()}
-              onValueChange={(value) => setArticlesPerPage(parseInt(value, 10))}
-              disabled={isSaving}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAGE_SIZE_OPTIONS.map((size) => (
-                  <SelectItem key={size} value={size.toString()}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="font-display text-sm text-foreground">
+                Articles Per Page
+              </label>
+              <Select
+                value={articlesPerPage.toString()}
+                onValueChange={(value) => setArticlesPerPage(parseInt(value, 10))}
+                disabled={isSaving}
+              >
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map((size) => (
+                    <SelectItem key={size} value={size.toString()}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <label className="font-display text-sm text-foreground">
+                    Collapse Duplicates
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Show only one article per story group
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={collapseDuplicates}
+                onCheckedChange={setCollapseDuplicates}
+              />
+            </div>
           </div>
         </div>
       </main>
