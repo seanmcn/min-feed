@@ -1,5 +1,15 @@
 import { Amplify } from 'aws-amplify';
 
+// Store custom outputs for access by other parts of the app
+let customConfig: { feedPreviewUrl?: string } = {};
+
+/**
+ * Get custom configuration values from amplify_outputs.json
+ */
+export function getCustomConfig() {
+  return customConfig;
+}
+
 /**
  * Configure Amplify with the outputs from the backend deployment.
  *
@@ -14,6 +24,12 @@ export async function configureAmplify(): Promise<void> {
     }
     const outputs = await response.json();
     Amplify.configure(outputs);
+
+    // Store custom outputs for later access
+    if (outputs.custom) {
+      customConfig = outputs.custom;
+    }
+
     console.log('Amplify configured successfully');
   } catch (error) {
     console.error('Failed to configure Amplify:', error);

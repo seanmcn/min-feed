@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Loader2, Rss } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2, Rss, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Header } from '@/components/Header';
+import { FeedPreviewDialog } from '@/components/FeedPreviewDialog';
 import { useFeedsStore } from '@/store/feedsStore';
+import type { Feed } from '@noise-gate/shared';
 
 interface SourcesProps {
   signOut: () => void;
@@ -14,6 +16,7 @@ interface SourcesProps {
 export function Sources({ signOut }: SourcesProps) {
   const [url, setUrl] = useState('');
   const [name, setName] = useState('');
+  const [previewFeed, setPreviewFeed] = useState<Feed | null>(null);
 
   const {
     feeds,
@@ -177,21 +180,39 @@ export function Sources({ signOut }: SourcesProps) {
                     </div>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteFeed(feed.id)}
-                    disabled={isSaving}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPreviewFeed(feed)}
+                      disabled={isSaving}
+                      className="text-muted-foreground hover:text-foreground"
+                      title="Preview feed"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteFeed(feed.id)}
+                      disabled={isSaving}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
       </main>
+
+      <FeedPreviewDialog
+        feed={previewFeed}
+        open={previewFeed !== null}
+        onOpenChange={(open) => !open && setPreviewFeed(null)}
+      />
     </div>
   );
 }

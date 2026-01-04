@@ -156,6 +156,46 @@ export const dataApi = {
   },
 
   /**
+   * List feed items for a specific feed.
+   */
+  async listFeedItemsByFeed(feedId: string): Promise<Article[]> {
+    const user = await authService.getCurrentUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, errors } = await client.models.FeedItem.list({
+      filter: { feedId: { eq: feedId } },
+      limit: 100,
+    });
+
+    if (errors?.length) {
+      throw new Error(errors[0].message);
+    }
+
+    return (data || [])
+      .sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+        const dateA = new Date(a.publishedAt as string).getTime();
+        const dateB = new Date(b.publishedAt as string).getTime();
+        return dateB - dateA;
+      })
+      .map((record: Record<string, unknown>) => ({
+        id: record.id as string,
+        title: record.title as string,
+        snippet: (record.content as string) || '',
+        url: record.url as string,
+        feedName: (record.feedName as string) || 'Unknown',
+        sentiment: (record.sentiment as string) as Sentiment,
+        score: (record.sentimentScore as number) || 50,
+        publishedAt: record.publishedAt as string,
+        fetchedAt: record.fetchedAt as string,
+        tags: [],
+        category: (record.category as string) as Category,
+        storyGroupId: (record.storyGroupId as string) || undefined,
+        isHidden: (record.isHidden as boolean) || false,
+        seenAt: (record.seenAt as string) || undefined,
+      }));
+  },
+
+  /**
    * Mark a feed item as seen.
    */
   async markItemSeen(itemId: string): Promise<void> {

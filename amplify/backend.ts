@@ -5,11 +5,13 @@ import { Rule, Schedule, RuleTargetInput } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { FunctionUrlAuthType } from 'aws-cdk-lib/aws-lambda';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { rssPollFunction } from './functions/rss-poll/resource';
 import { aiProcessorFunction } from './functions/ai-processor/resource';
 import { dataCleanupFunction } from './functions/data-cleanup/resource';
+import { feedPreviewFunction } from './functions/feed-preview/resource';
 
 const backend = defineBackend({
   auth,
@@ -17,6 +19,7 @@ const backend = defineBackend({
   rssPollFunction,
   aiProcessorFunction,
   dataCleanupFunction,
+  feedPreviewFunction,
 });
 
 // In production (has AWS_BRANCH), disable self-signup
@@ -120,6 +123,25 @@ new Rule(dataCleanupStack, 'DataCleanupSchedule', {
       event: RuleTargetInput.fromObject({ action: 'full' }),
     }),
   ],
+});
+
+// === Feed Preview Function ===
+// Create a function URL for the feed preview Lambda (allows direct HTTP calls from frontend)
+const feedPreviewLambda = backend.feedPreviewFunction.resources.lambda;
+const feedPreviewUrl = feedPreviewLambda.addFunctionUrl({
+  authType: FunctionUrlAuthType.NONE, // Public endpoint for RSS fetching
+  cors: {
+    allowedOrigins: ['*'],
+    allowedMethods: [cdk.aws_lambda.HttpMethod.POST],
+    allowedHeaders: ['Content-Type'],
+  },
+});
+
+// Add to amplify_outputs.json so frontend can access it
+backend.addOutput({
+  custom: {
+    feedPreviewUrl: feedPreviewUrl.url,
+  },
 });
 
 export { backend };
