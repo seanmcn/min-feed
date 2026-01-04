@@ -17,33 +17,46 @@ const OWNER_ID = process.env.OWNER_ID || 'default-owner';
 
 /**
  * Get feed items that haven't been processed by AI yet.
+ * Uses pagination to find items across the entire table.
  */
 export async function getUnprocessedItems(
   limit: number
 ): Promise<FeedItemForClassification[]> {
-  try {
-    const response = await docClient.send(
-      new ScanCommand({
-        TableName: FEED_ITEM_TABLE,
-        FilterExpression:
-          'attribute_not_exists(aiProcessedAt) AND #owner = :owner',
-        ExpressionAttributeNames: {
-          '#owner': 'owner',
-        },
-        ExpressionAttributeValues: {
-          ':owner': OWNER_ID,
-        },
-        ProjectionExpression: 'id, title, content, storyGroupId',
-        Limit: limit,
-      })
-    );
+  const items: FeedItemForClassification[] = [];
+  let lastKey: Record<string, unknown> | undefined;
 
-    return (response.Items || []).map((item) => ({
-      id: item.id as string,
-      title: item.title as string,
-      content: (item.content as string) || '',
-      storyGroupId: (item.storyGroupId as string) || '',
-    }));
+  try {
+    do {
+      const response = await docClient.send(
+        new ScanCommand({
+          TableName: FEED_ITEM_TABLE,
+          FilterExpression:
+            'attribute_not_exists(aiProcessedAt) AND #owner = :owner',
+          ExpressionAttributeNames: {
+            '#owner': 'owner',
+          },
+          ExpressionAttributeValues: {
+            ':owner': OWNER_ID,
+          },
+          ProjectionExpression: 'id, title, content, storyGroupId',
+          ExclusiveStartKey: lastKey,
+        })
+      );
+
+      for (const item of response.Items || []) {
+        items.push({
+          id: item.id as string,
+          title: item.title as string,
+          content: (item.content as string) || '',
+          storyGroupId: (item.storyGroupId as string) || '',
+        });
+        if (items.length >= limit) break;
+      }
+
+      lastKey = response.LastEvaluatedKey;
+    } while (lastKey && items.length < limit);
+
+    return items;
   } catch (error) {
     console.error('Error fetching unprocessed items:', error);
     return [];
