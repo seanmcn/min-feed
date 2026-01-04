@@ -66,13 +66,11 @@ const Index = ({ signOut }: IndexProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header signOut={signOut} />
+      <Header signOut={signOut} showHidden={showHidden} onToggleShowHidden={toggleShowHidden} />
       <Hero />
       <FilterBar
         categoryFilters={categoryFilters}
-        showHidden={showHidden}
         onCategoryToggle={toggleCategory}
-        onToggleShowHidden={toggleShowHidden}
       />
 
       <main className="container mx-auto px-4 py-8">
