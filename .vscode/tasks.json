@@ -1,0 +1,156 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Sandbox: Set OpenAI Secret",
+      "type": "shell",
+      "command": "npx ampx sandbox secret set OPENAI_API_KEY",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Sandbox: List Secrets",
+      "type": "shell",
+      "command": "npx ampx sandbox secret list",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Sandbox: Start",
+      "type": "shell",
+      "command": "npm run sandbox",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Sandbox: Reset (Delete & Restart)",
+      "type": "shell",
+      "command": "npx ampx sandbox delete -y && npx ampx sandbox --outputs-out-dir frontend/public",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Frontend: Start",
+      "type": "shell",
+      "command": "npm run dev:frontend",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Dev: Start All",
+      "type": "shell",
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
+      "label": "Build: All",
+      "type": "shell",
+      "command": "npm run build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Typecheck",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lambda: Invoke RSS Poller",
+      "type": "shell",
+      "command": "FUNC=$(aws lambda list-functions --query \"Functions[?contains(FunctionName, 'rsspoll')].FunctionName\" --output text) && echo \"Invoking $FUNC\" && aws lambda invoke --function-name $FUNC --payload '{}' /tmp/rss-poll-output.json && cat /tmp/rss-poll-output.json",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Lambda: Invoke AI Processor",
+      "type": "shell",
+      "command": "FUNC=$(aws lambda list-functions --query \"Functions[?contains(FunctionName, 'aiprocessor')].FunctionName\" --output text) && echo \"Invoking $FUNC\" && aws lambda invoke --function-name $FUNC --payload '{}' /tmp/ai-processor-output.json && cat /tmp/ai-processor-output.json",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Lambda: Invoke Both (RSS then AI)",
+      "type": "shell",
+      "command": "echo '=== RSS Poller ===' && FUNC=$(aws lambda list-functions --query \"Functions[?contains(FunctionName, 'rsspoll')].FunctionName\" --output text) && aws lambda invoke --function-name $FUNC --payload '{}' /tmp/rss-output.json && cat /tmp/rss-output.json && echo '\n=== AI Processor ===' && FUNC=$(aws lambda list-functions --query \"Functions[?contains(FunctionName, 'aiprocessor')].FunctionName\" --output text) && aws lambda invoke --function-name $FUNC --payload '{}' /tmp/ai-output.json && cat /tmp/ai-output.json",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Kill Orphan Processes",
+      "type": "shell",
+      "command": "pkill -f 'ampx sandbox' || true",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "close": true
+      }
+    },
+    {
+      "label": "Data: Clear All",
+      "type": "shell",
+      "command": "./scripts/clear-data.sh",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Data: Cleanup Now",
+      "type": "shell",
+      "command": "FUNC=$(aws lambda list-functions --query \"Functions[?contains(FunctionName, 'datacleanup')].FunctionName\" --output text) && echo \"Invoking $FUNC\" && aws lambda invoke --function-name $FUNC --payload '{\"action\": \"full\"}' --cli-binary-format raw-in-base64-out /tmp/cleanup-output.json && cat /tmp/cleanup-output.json",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}
