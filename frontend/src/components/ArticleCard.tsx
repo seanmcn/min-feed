@@ -78,9 +78,7 @@ export function ArticleCard({ article, groupedCount, isPrioritySource, isSelecte
       </h3>
 
       {article.summary && (
-        <p className="text-sm text-foreground/80 mb-3 italic border-l-2 border-primary/30 pl-3">
-          {article.summary}
-        </p>
+        <SummaryBlock summary={article.summary} />
       )}
 
       {!article.summary && (
@@ -115,6 +113,39 @@ export function ArticleCard({ article, groupedCount, isPrioritySource, isSelecte
         </a>
       </div>
     </article>
+  );
+}
+
+function SummaryBlock({ summary }: { summary: string }) {
+  // Parse "TL;DR: ... Why it matters: ..." format
+  const tldrMatch = summary.match(/^(?:TL;DR:\s*)?(.+?)(?:\s*Why it matters:\s*(.+))?$/i);
+
+  if (!tldrMatch) {
+    // Fallback: just show the summary as-is
+    return (
+      <p className="text-sm text-foreground/80 mb-3 italic border-l-2 border-primary/30 pl-3">
+        {summary}
+      </p>
+    );
+  }
+
+  const tldr = tldrMatch[1]?.trim();
+  const whyItMatters = tldrMatch[2]?.trim();
+
+  return (
+    <div className="text-sm mb-3 space-y-1.5 border-l-2 border-primary/30 pl-3">
+      {tldr && (
+        <p className="text-foreground/90">
+          {tldr}
+        </p>
+      )}
+      {whyItMatters && (
+        <p className="text-muted-foreground text-xs">
+          <span className="font-medium text-primary/70">Why it matters:</span>{' '}
+          {whyItMatters}
+        </p>
+      )}
+    </div>
   );
 }
 
