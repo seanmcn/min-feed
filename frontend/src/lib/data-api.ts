@@ -50,6 +50,7 @@ export const dataApi = {
       title: record.title as string,
       snippet: (record.content as string) || '',
       url: record.url as string,
+      feedId: record.feedId as string,
       feedName: (record.feedName as string) || 'Unknown',
       sentiment: (record.sentiment as string) as Sentiment,
       score: (record.sentimentScore as number) || 50,
@@ -184,6 +185,7 @@ export const dataApi = {
         title: record.title as string,
         snippet: (record.content as string) || '',
         url: record.url as string,
+        feedId: record.feedId as string,
         feedName: (record.feedName as string) || 'Unknown',
         sentiment: (record.sentiment as string) as Sentiment,
         score: (record.sentimentScore as number) || 50,
@@ -241,6 +243,7 @@ export const dataApi = {
       url: record.url as string,
       name: record.name as string,
       isActive: record.isActive as boolean,
+      isPriority: (record.isPriority as boolean) || false,
       lastPolledAt: (record.lastPolledAt as string) || undefined,
       pollIntervalMinutes: (record.pollIntervalMinutes as number) || 15,
     }));
@@ -257,6 +260,7 @@ export const dataApi = {
       url: feed.url,
       name: feed.name,
       isActive: feed.isActive,
+      isPriority: feed.isPriority,
       pollIntervalMinutes: feed.pollIntervalMinutes,
     });
 
@@ -268,6 +272,7 @@ export const dataApi = {
       url: data.url as string,
       name: data.name as string,
       isActive: data.isActive as boolean,
+      isPriority: (data.isPriority as boolean) || false,
       lastPolledAt: (data.lastPolledAt as string) || undefined,
       pollIntervalMinutes: (data.pollIntervalMinutes as number) || 15,
     };
@@ -293,6 +298,7 @@ export const dataApi = {
       url: data.url as string,
       name: data.name as string,
       isActive: data.isActive as boolean,
+      isPriority: (data.isPriority as boolean) || false,
       lastPolledAt: (data.lastPolledAt as string) || undefined,
       pollIntervalMinutes: (data.pollIntervalMinutes as number) || 15,
     };
@@ -331,6 +337,7 @@ export const dataApi = {
       const created = await this.createFeed({
         ...feed,
         isActive: true,
+        isPriority: false,
         pollIntervalMinutes: 15,
       });
       feeds.push(created);

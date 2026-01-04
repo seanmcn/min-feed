@@ -1,4 +1,4 @@
-import { ExternalLink, Clock, Check, Layers, Zap } from 'lucide-react';
+import { ExternalLink, Clock, Check, Layers, Zap, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Article } from '@/types/article';
 import { cn } from '@/lib/utils';
@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 interface ArticleCardProps {
   article: Article;
   groupedCount?: number;
+  isPrioritySource?: boolean;
   onMarkSeen: (id: string) => void;
   onShowGroupedSources?: (storyGroupId: string) => void;
 }
@@ -22,7 +23,7 @@ const categoryLabels: Record<string, string> = {
   other: 'Other',
 };
 
-export function ArticleCard({ article, groupedCount, onMarkSeen, onShowGroupedSources }: ArticleCardProps) {
+export function ArticleCard({ article, groupedCount, isPrioritySource, onMarkSeen, onShowGroupedSources }: ArticleCardProps) {
   const isSeen = Boolean(article.seenAt);
 
   return (
@@ -33,7 +34,10 @@ export function ArticleCard({ article, groupedCount, onMarkSeen, onShowGroupedSo
     )}>
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="source">{article.feedName}</Badge>
+          <Badge variant="source" className={isPrioritySource ? 'ring-1 ring-amber-500/50' : ''}>
+            {isPrioritySource && <Star className="w-3 h-3 mr-1 fill-amber-500 text-amber-500" />}
+            {article.feedName}
+          </Badge>
           <Badge variant="outline" className="text-[10px] font-display uppercase">
             {categoryLabels[article.category] || article.category || 'Uncategorized'}
           </Badge>

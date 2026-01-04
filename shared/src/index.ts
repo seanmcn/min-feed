@@ -23,6 +23,7 @@ export interface Article {
   title: string;
   snippet: string;
   url: string;
+  feedId: string;
   feedName: string;
   sentiment: Sentiment;
   score: number; // 0-100 sentiment score
@@ -55,6 +56,7 @@ export interface Feed {
   url: string;
   name: string;
   isActive: boolean;
+  isPriority: boolean;
   lastPolledAt?: string;
   pollIntervalMinutes: number;
 }

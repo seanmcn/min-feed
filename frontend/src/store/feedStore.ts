@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Article, Sentiment, Category } from '@noise-gate/shared';
 import { dataApi } from '@/lib/data-api';
 
-export type SortOption = 'newest' | 'importance';
+export type SortOption = 'newest' | 'importance' | 'priority';
 
 interface FeedState {
   // Data

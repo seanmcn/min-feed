@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Loader2, Rss, Eye } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2, Rss, Eye, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ export function Sources({ signOut }: SourcesProps) {
     addFeed,
     deleteFeed,
     toggleFeed,
+    togglePriority,
   } = useFeedsStore();
 
   useEffect(() => {
@@ -181,6 +182,16 @@ export function Sources({ signOut }: SourcesProps) {
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => togglePriority(feed.id)}
+                      disabled={isSaving}
+                      className={feed.isPriority ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground hover:text-foreground'}
+                      title={feed.isPriority ? 'Remove priority' : 'Mark as priority'}
+                    >
+                      <Star className={`w-4 h-4 ${feed.isPriority ? 'fill-current' : ''}`} />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"

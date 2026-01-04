@@ -7,6 +7,7 @@ const schema = a.schema({
       url: a.string().required(),
       name: a.string().required(),
       isActive: a.boolean().default(true),
+      isPriority: a.boolean().default(false),
       lastPolledAt: a.datetime(),
       pollIntervalMinutes: a.integer().default(15),
     })

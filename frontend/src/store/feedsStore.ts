@@ -13,6 +13,7 @@ interface FeedsState {
   updateFeed: (id: string, updates: Partial<Feed>) => Promise<void>;
   deleteFeed: (id: string) => Promise<void>;
   toggleFeed: (id: string) => Promise<void>;
+  togglePriority: (id: string) => Promise<void>;
 }
 
 export const useFeedsStore = create<FeedsState>((set, get) => ({
@@ -46,6 +47,7 @@ export const useFeedsStore = create<FeedsState>((set, get) => ({
       const newFeed = await dataApi.createFeed({
         ...feed,
         isActive: true,
+        isPriority: false,
         pollIntervalMinutes: 15,
       });
       set((state) => ({
@@ -113,6 +115,31 @@ export const useFeedsStore = create<FeedsState>((set, get) => ({
           f.id === id ? { ...f, isActive: feed.isActive } : f
         ),
         error: err instanceof Error ? err.message : 'Failed to toggle feed',
+      }));
+    }
+  },
+
+  togglePriority: async (id) => {
+    const { feeds } = get();
+    const feed = feeds.find((f) => f.id === id);
+    if (!feed) return;
+
+    // Optimistic update
+    set((state) => ({
+      feeds: state.feeds.map((f) =>
+        f.id === id ? { ...f, isPriority: !f.isPriority } : f
+      ),
+    }));
+
+    try {
+      await dataApi.updateFeed(id, { isPriority: !feed.isPriority });
+    } catch (err) {
+      // Revert on failure
+      set((state) => ({
+        feeds: state.feeds.map((f) =>
+          f.id === id ? { ...f, isPriority: feed.isPriority } : f
+        ),
+        error: err instanceof Error ? err.message : 'Failed to toggle priority',
       }));
     }
   },
