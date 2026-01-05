@@ -9,6 +9,7 @@ import { VuMeterFilter } from '@/components/VuMeterFilter';
 import { NewsFeed } from '@/components/NewsFeed';
 import { GroupedSourcesDialog } from '@/components/GroupedSourcesDialog';
 import { KeyboardShortcutsHelp } from '@/components/KeyboardShortcutsHelp';
+import { FeatureTour } from '@/components/FeatureTour';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ import {
 import { useFeedStore, type SortOption } from '@/store/feedStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useTour } from '@/hooks/useTour';
 
 interface IndexProps {
   signOut?: () => void;
@@ -58,6 +60,9 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
 
   const [selectedStoryGroupId, setSelectedStoryGroupId] = useState<string | null>(null);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+
+  // Feature tour
+  const tour = useTour();
 
   const pageSize = preferences?.articlesPerPage ?? 12;
 
@@ -138,11 +143,13 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
     <div className="min-h-screen bg-background">
       <SEO />
       <Header signOut={signOut} isAuthenticated={isAuthenticated} />
-      {!isAuthenticated && <Hero />}
-      <FilterBar
-        categoryFilters={categoryFilters}
-        onCategoryToggle={toggleCategory}
-      />
+      {!isAuthenticated && <Hero onStartTour={tour.start} />}
+      <div data-tour="categories">
+        <FilterBar
+          categoryFilters={categoryFilters}
+          onCategoryToggle={toggleCategory}
+        />
+      </div>
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
@@ -152,7 +159,9 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
           </h2>
 
           <div className="flex items-center gap-2">
-            <VuMeterFilter />
+            <div data-tour="sentiment">
+              <VuMeterFilter />
+            </div>
 
             {isAuthenticated && (
               <Button
@@ -166,30 +175,32 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
               </Button>
             )}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-                  <ArrowDownWideNarrow className="w-4 h-4" />
-                  {sortBy === 'newest' ? 'Newest' : 'Important'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => setSortBy('newest')}
-                  className={sortBy === 'newest' ? 'bg-secondary' : ''}
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Newest first
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSortBy('importance')}
-                  className={sortBy === 'importance' ? 'bg-secondary' : ''}
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  Most important
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div data-tour="sort">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                    <ArrowDownWideNarrow className="w-4 h-4" />
+                    {sortBy === 'newest' ? 'Newest' : 'Important'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('newest')}
+                    className={sortBy === 'newest' ? 'bg-secondary' : ''}
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    Newest first
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('importance')}
+                    className={sortBy === 'importance' ? 'bg-secondary' : ''}
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Most important
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
@@ -214,6 +225,18 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
         <KeyboardShortcutsHelp
           open={showShortcutsHelp}
           onOpenChange={setShowShortcutsHelp}
+        />
+
+        <FeatureTour
+          isOpen={tour.isOpen}
+          currentStep={tour.currentStep}
+          totalSteps={tour.totalSteps}
+          stepData={tour.currentStepData}
+          onNext={tour.next}
+          onPrevious={tour.previous}
+          onClose={tour.close}
+          isFirstStep={tour.isFirstStep}
+          isLastStep={tour.isLastStep}
         />
       </main>
 

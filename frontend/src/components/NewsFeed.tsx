@@ -53,6 +53,7 @@ export function NewsFeed({
           <div
             key={article.id}
             data-article-index={index}
+            data-tour={index === 0 ? 'article' : undefined}
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <ArticleCard

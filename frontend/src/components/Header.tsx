@@ -54,6 +54,7 @@ export function Header({ signOut, isAuthenticated = false }: HeaderProps) {
             <>
               <Link
                 to="/auth/register"
+                data-tour="register"
                 className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors font-medium text-sm"
               >
                 Register

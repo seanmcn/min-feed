@@ -168,6 +168,55 @@
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(195 100% 50% / 0.2);
+    }
+    50% {
+      box-shadow: 0 0 8px 2px hsl(195 100% 50% / 0.15);
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+
+  /* Static glow shadow for tour button */
+  .shadow-glow-primary {
+    box-shadow:
+      0 4px 14px hsl(195 100% 50% / 0.3),
+      0 0 20px hsl(195 100% 50% / 0.15);
+  }
+
+  /* Subtle bounce for pointer arrow */
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 1.5s ease-in-out infinite;
+  }
+
+  @keyframes ping-slow {
+    0% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+  }
+
+  .animate-ping-slow {
+    animation: ping-slow 2s ease-in-out infinite;
+  }
 }
 
 /* Amplify UI Authenticator Styling */
