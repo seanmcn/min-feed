@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowLeft, Plus, Trash2, Loader2, Rss, Circle, AlertCircle, Globe, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
@@ -13,7 +13,12 @@ import {
 } from '@/components/ui/tooltip';
 import { Header } from '@/components/Header';
 import { SourcePreviewDialog } from '@/components/SourcePreviewDialog';
-import { useSourcesStore } from '@/store/sourcesStore';
+import {
+  useSourcesQuery,
+  useToggleSourceMutation,
+  useAddCustomSourceMutation,
+  useRemoveCustomSourceMutation,
+} from '@/hooks/useFeedQuery';
 import type { Source } from '@minfeed/shared';
 import { formatRelativeTime } from '@minfeed/shared';
 
@@ -68,30 +73,44 @@ export function Sources({ signOut }: SourcesProps) {
   const [name, setName] = useState('');
   const [previewSource, setPreviewSource] = useState<Source | null>(null);
 
-  const {
-    sources,
-    subscriptions,
-    isLoading,
-    isSaving,
-    error,
-    customSourceLimit,
-    systemSources,
-    customSources,
-    enabledSourceIds,
-    customSourceCount,
-    loadSources,
-    toggleSourceEnabled,
-    addCustomSource,
-    removeCustomSource,
-  } = useSourcesStore();
+  // React Query hooks
+  const { data, isLoading, error } = useSourcesQuery();
+  const toggleMutation = useToggleSourceMutation();
+  const addMutation = useAddCustomSourceMutation();
+  const removeMutation = useRemoveCustomSourceMutation();
 
-  useEffect(() => {
-    loadSources();
-  }, [loadSources]);
+  const isSaving = toggleMutation.isPending || addMutation.isPending || removeMutation.isPending;
+  const mutationError = toggleMutation.error || addMutation.error || removeMutation.error;
+
+  // Memoize data to avoid lint warnings about unstable dependencies
+  const sources = useMemo(() => data?.sources ?? [], [data?.sources]);
+  const subscriptions = useMemo(() => data?.subscriptions ?? [], [data?.subscriptions]);
+  const customSourceLimit = data?.customSourceLimit ?? 3;
+
+  // Computed values
+  const enabledSourceIds = useMemo(
+    () => new Set(subscriptions.filter((s) => s.isEnabled).map((s) => s.sourceId)),
+    [subscriptions]
+  );
+
+  const systemSourcesList = useMemo(
+    () => sources.filter((s) => s.type === 'system'),
+    [sources]
+  );
+
+  const customSourcesList = useMemo(() => {
+    const subscribedSourceIds = new Set(subscriptions.map((s) => s.sourceId));
+    return sources.filter((s) => s.type === 'custom' && subscribedSourceIds.has(s.id));
+  }, [sources, subscriptions]);
+
+  const currentCustomCount = useMemo(
+    () => subscriptions.filter((s) => s.sourceType === 'custom').length,
+    [subscriptions]
+  );
 
   const handleAdd = async () => {
     if (!url.trim() || !name.trim()) return;
-    await addCustomSource(url.trim(), name.trim());
+    await addMutation.mutateAsync({ url: url.trim(), name: name.trim() });
     setUrl('');
     setName('');
   };
@@ -103,16 +122,26 @@ export function Sources({ signOut }: SourcesProps) {
   };
 
   const getSubscriptionForSource = (sourceId: string) => {
-    return subscriptions.find(s => s.sourceId === sourceId);
+    return subscriptions.find((s) => s.sourceId === sourceId);
   };
 
   const isSourceEnabled = (sourceId: string) => {
-    return enabledSourceIds().has(sourceId);
+    return enabledSourceIds.has(sourceId);
   };
 
-  const systemSourcesList = systemSources();
-  const customSourcesList = customSources();
-  const currentCustomCount = customSourceCount();
+  const handleToggleSource = (sourceId: string) => {
+    const subscription = getSubscriptionForSource(sourceId);
+    if (!subscription) return;
+    toggleMutation.mutate({
+      subscriptionId: subscription.id,
+      sourceId,
+      newEnabled: !subscription.isEnabled,
+    });
+  };
+
+  const handleRemoveSource = (subscriptionId: string, sourceId: string) => {
+    removeMutation.mutate({ subscriptionId, sourceId });
+  };
 
   if (isLoading) {
     return (
@@ -147,9 +176,9 @@ export function Sources({ signOut }: SourcesProps) {
             </p>
           </div>
 
-          {error && (
+          {(error || mutationError) && (
             <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
-              {error}
+              {error instanceof Error ? error.message : mutationError instanceof Error ? mutationError.message : 'An error occurred'}
             </div>
           )}
 
@@ -192,7 +221,7 @@ export function Sources({ signOut }: SourcesProps) {
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         <Switch
                           checked={enabled}
-                          onCheckedChange={() => toggleSourceEnabled(source.id)}
+                          onCheckedChange={() => handleToggleSource(source.id)}
                           disabled={isSaving}
                         />
                         <div className="flex-1 min-w-0">
@@ -262,7 +291,7 @@ export function Sources({ signOut }: SourcesProps) {
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         <Switch
                           checked={enabled}
-                          onCheckedChange={() => toggleSourceEnabled(source.id)}
+                          onCheckedChange={() => handleToggleSource(source.id)}
                           disabled={isSaving}
                         />
                         <div className="flex-1 min-w-0">
@@ -291,7 +320,7 @@ export function Sources({ signOut }: SourcesProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeCustomSource(subscription.id, source.id)}
+                            onClick={() => handleRemoveSource(subscription.id, source.id)}
                             disabled={isSaving}
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           >

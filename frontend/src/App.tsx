@@ -7,8 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useFeedStore } from '@/store/feedStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { useSourcesStore } from '@/store/sourcesStore';
-import { useFeedQuery } from '@/hooks/useFeedQuery';
+import { useFeedQuery, useSourcesQuery } from '@/hooks/useFeedQuery';
 import { authTheme } from '@/lib/amplify-theme';
 import { AuthLayout } from '@/components/AuthLayout';
 import { SEO } from '@/components/SEO';
@@ -57,8 +56,10 @@ function AppContent() {
   const setAuthenticated = useFeedStore((state) => state.setAuthenticated);
   const setSentimentFilters = useFeedStore((state) => state.setSentimentFilters);
   const loadPreferences = useSettingsStore((state) => state.loadPreferences);
-  const loadSources = useSourcesStore((state) => state.loadSources);
   const preferences = useSettingsStore((state) => state.preferences);
+
+  // Prefetch sources for authenticated users (cached for Sources page)
+  useSourcesQuery(isAuthenticated);
 
   // Use React Query for feed data with caching
   const { data: articles, isLoading, error } = useFeedQuery(isAuthenticated);
@@ -85,13 +86,12 @@ function AppContent() {
     setAuthenticated(isAuthenticated);
   }, [isAuthenticated, setAuthenticated]);
 
-  // Load sources and preferences for authenticated users
+  // Load preferences for authenticated users
   useEffect(() => {
     if (isAuthenticated) {
-      loadSources();
       loadPreferences();
     }
-  }, [isAuthenticated, loadSources, loadPreferences]);
+  }, [isAuthenticated, loadPreferences]);
 
   // Sync sentiment filters from preferences to feed store (authenticated only)
   useEffect(() => {
