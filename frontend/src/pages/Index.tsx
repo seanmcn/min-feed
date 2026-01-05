@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { ArrowDownWideNarrow, Clock, Zap } from 'lucide-react';
+import { ArrowDownWideNarrow, Clock, Zap, Eye, EyeOff } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { FilterBar } from '@/components/FilterBar';
+import { VuMeterFilter } from '@/components/VuMeterFilter';
 import { NewsFeed } from '@/components/NewsFeed';
 import { GroupedSourcesDialog } from '@/components/GroupedSourcesDialog';
 import { KeyboardShortcutsHelp } from '@/components/KeyboardShortcutsHelp';
@@ -122,7 +123,7 @@ const Index = ({ signOut }: IndexProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header signOut={signOut} showHidden={showHidden} onToggleShowHidden={toggleShowHidden} />
+      <Header signOut={signOut} />
       <Hero />
       <FilterBar
         categoryFilters={categoryFilters}
@@ -136,30 +137,44 @@ const Index = ({ signOut }: IndexProps) => {
             {isLoading && <span className="ml-2 text-sm">(loading...)</span>}
           </h2>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-                <ArrowDownWideNarrow className="w-4 h-4" />
-                {sortBy === 'newest' ? 'Newest' : 'Important'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setSortBy('newest')}
-                className={sortBy === 'newest' ? 'bg-secondary' : ''}
-              >
-                <Clock className="w-4 h-4 mr-2" />
-                Newest first
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setSortBy('importance')}
-                className={sortBy === 'importance' ? 'bg-secondary' : ''}
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Most important
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <VuMeterFilter />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleShowHidden}
+              className={`gap-2 ${showHidden ? 'text-foreground' : 'text-muted-foreground'}`}
+            >
+              {showHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              {showHidden ? 'Showing read' : 'Show read'}
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                  <ArrowDownWideNarrow className="w-4 h-4" />
+                  {sortBy === 'newest' ? 'Newest' : 'Important'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => setSortBy('newest')}
+                  className={sortBy === 'newest' ? 'bg-secondary' : ''}
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  Newest first
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setSortBy('importance')}
+                  className={sortBy === 'importance' ? 'bg-secondary' : ''}
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Most important
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <NewsFeed
