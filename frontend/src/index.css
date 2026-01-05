@@ -170,8 +170,121 @@
   }
 }
 
-/* Amplify UI field control styling */
+/* Amplify UI Authenticator Styling */
+.amplify-authenticator {
+  --amplify-components-authenticator-router-border-width: 1px;
+}
+
+.amplify-authenticator__container {
+  padding: 0;
+}
+
+/* Form container */
+[data-amplify-authenticator] [data-amplify-router] {
+  background: linear-gradient(
+    145deg,
+    hsl(220 18% 10%) 0%,
+    hsl(220 20% 8%) 100%
+  );
+  border: 1px solid hsl(220 15% 18%);
+  border-radius: 1rem;
+  box-shadow:
+    0 4px 24px hsla(220, 20%, 2%, 0.6),
+    0 0 0 1px hsla(220, 15%, 25%, 0.1);
+}
+
+/* Tabs styling */
+[data-amplify-authenticator] .amplify-tabs {
+  border-bottom: 1px solid hsl(220 15% 18%);
+}
+
+[data-amplify-authenticator] .amplify-tabs__item {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+}
+
+[data-amplify-authenticator] .amplify-tabs__item:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Input fields */
 .amplify-input,
 .amplify-field-group__control {
-  background-color: hsl(220 15% 18%);
+  background-color: hsl(220 15% 12%);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.amplify-input:hover,
+.amplify-field-group__control:hover {
+  background-color: hsl(220 15% 14%);
+}
+
+.amplify-input:focus,
+.amplify-field-group__control:focus {
+  outline: none !important;
+  border-color: hsl(195 100% 50%) !important;
+  box-shadow: 0 0 0 2px hsl(195 100% 50% / 0.2) !important;
+}
+
+/* Labels */
+.amplify-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Primary button - ensure cyan background with dark text */
+[data-amplify-authenticator] .amplify-button--primary {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  background-color: hsl(195 100% 50%) !important;
+  color: hsl(220 20% 6%) !important;
+  border-color: hsl(195 100% 50%) !important;
+}
+
+[data-amplify-authenticator] .amplify-button--primary:hover {
+  transform: translateY(-1px);
+  background-color: hsl(195 100% 45%) !important;
+  box-shadow: 0 4px 12px hsla(195, 100%, 50%, 0.3);
+}
+
+[data-amplify-authenticator] .amplify-button--primary:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px hsl(195 100% 50% / 0.4) !important;
+}
+
+/* Link buttons */
+[data-amplify-authenticator] .amplify-button--link {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+}
+
+[data-amplify-authenticator] .amplify-button--link:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Heading */
+[data-amplify-authenticator] .amplify-heading {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+}
+
+/* Password field show/hide button */
+.amplify-field-group__outer-end .amplify-button {
+  background: transparent;
+  border: none;
+}
+
+/* Error messages */
+[data-amplify-authenticator] .amplify-alert {
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
 }

@@ -3,8 +3,8 @@ import '@aws-amplify/ui-react/styles.css';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import { useFeedStore } from '@/store/feedStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useFeedQuery, useSourcesQuery } from '@/hooks/useFeedQuery';
@@ -28,9 +28,23 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Auth page at /auth - redirects to home if already authenticated
-function AuthPage() {
-  const { authStatus } = useAuthenticator();
+// Auth page component - redirects to home if already authenticated
+function AuthPage({ initialState }: { initialState: 'signIn' | 'signUp' }) {
+  const { authStatus, toSignIn, toSignUp } = useAuthenticator();
+  const location = useLocation();
+  const lastPathRef = useRef<string | null>(null);
+
+  // Sync Amplify's internal state with the route (only on path change)
+  useEffect(() => {
+    if (lastPathRef.current !== location.pathname) {
+      lastPathRef.current = location.pathname;
+      if (initialState === 'signUp') {
+        toSignUp();
+      } else {
+        toSignIn();
+      }
+    }
+  }, [location.pathname, initialState, toSignIn, toSignUp]);
 
   if (authStatus === 'authenticated') {
     return <Navigate to="/" replace />;
@@ -40,7 +54,7 @@ function AuthPage() {
     <>
       <SEO />
       <AuthLayout>
-        <Authenticator />
+        <Authenticator initialState={initialState} />
       </AuthLayout>
     </>
   );
@@ -121,8 +135,17 @@ function AppContent() {
             }
           />
           <Route
+            path="/auth/login"
+            element={<AuthPage initialState="signIn" />}
+          />
+          <Route
+            path="/auth/register"
+            element={<AuthPage initialState="signUp" />}
+          />
+          {/* Redirect /auth to /auth/login */}
+          <Route
             path="/auth"
-            element={<AuthPage />}
+            element={<Navigate to="/auth/login" replace />}
           />
           <Route
             path="/settings"

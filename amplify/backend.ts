@@ -26,13 +26,6 @@ const backend = defineBackend({
   sourceSeederFunction,
 });
 
-// In production (has AWS_BRANCH), disable self-signup
-if (process.env.AWS_BRANCH) {
-  const cfnUserPool = backend.auth.resources.cfnResources.cfnUserPool;
-  cfnUserPool.adminCreateUserConfig = {
-    allowAdminCreateUserOnly: true,
-  };
-}
 
 // Grant RSS poll function access to DynamoDB tables
 const rssPollLambda = backend.rssPollFunction.resources.lambda;
