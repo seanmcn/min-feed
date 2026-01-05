@@ -22,6 +22,8 @@ const schema = a.schema({
     .authorization((allow) => [
       // All authenticated users can read and create sources (for custom feeds)
       allow.authenticated().to(['read', 'create', 'update']),
+      // Public users can read sources (via API key)
+      allow.publicApiKey().to(['read']),
     ]),
 
   // User subscriptions to sources (controls visibility)
@@ -96,6 +98,8 @@ const schema = a.schema({
     .authorization((allow) => [
       // Lambda creates items, authenticated users can read/update
       allow.authenticated().to(['read', 'update']),
+      // Public users can read feed items (via API key)
+      allow.publicApiKey().to(['read']),
     ]),
 
   // Story groups for deduplication
@@ -129,6 +133,8 @@ const schema = a.schema({
     })
     .authorization((allow) => [
       allow.authenticated().to(['read']),
+      // Public users can read story groups (via API key)
+      allow.publicApiKey().to(['read']),
     ]),
 
   // User preferences (blocked words, hidden articles, display settings)
@@ -151,5 +157,9 @@ export const data = defineData({
   schema,
   authorizationModes: {
     defaultAuthorizationMode: 'userPool',
+    // Enable API key auth for public/guest read access
+    apiKeyAuthorizationMode: {
+      expiresInDays: 365,
+    },
   },
 });
