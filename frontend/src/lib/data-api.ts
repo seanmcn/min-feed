@@ -3,8 +3,27 @@ import type { Schema } from '../../../amplify/data/resource';
 import type { Article, UserPreferences, Source, UserSourceSubscription, Sentiment, Category, SourceType } from '@minfeed/shared';
 import { authService } from './auth-service';
 
+// Lazy-initialized clients (created after Amplify is configured)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const client = generateClient<Schema>() as any;
+let _client: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _publicClient: any = null;
+
+// Authenticated client (uses user pool auth)
+function getClient() {
+  if (!_client) {
+    _client = generateClient<Schema>();
+  }
+  return _client;
+}
+
+// Public client (uses API key auth for unauthenticated access)
+function getPublicClient() {
+  if (!_publicClient) {
+    _publicClient = generateClient<Schema>({ authMode: 'apiKey' });
+  }
+  return _publicClient;
+}
 
 // Helper to safely parse JSON fields from Amplify
 function parseJsonField<T>(value: unknown, defaultValue: T): T {
@@ -20,6 +39,65 @@ function parseJsonField<T>(value: unknown, defaultValue: T): T {
 }
 
 export const dataApi = {
+  /**
+   * List feed items from all system sources (public, no auth required).
+   * Used for the logged-out feed view.
+   */
+  async listPublicFeedItems(): Promise<Article[]> {
+    // First get system sources
+    const publicClient = getPublicClient();
+    const { data: sources, errors: sourceErrors } = await publicClient.models.Source.list({
+      filter: { type: { eq: 'system' } },
+    });
+
+    if (sourceErrors?.length) {
+      throw new Error(sourceErrors[0].message);
+    }
+
+    const systemSourceIds = new Set((sources || []).map((s: Record<string, unknown>) => s.id as string));
+
+    // Fetch all feed items
+    const { data, errors } = await publicClient.models.FeedItem.list({
+      limit: 500,
+    });
+
+    // Filter to system sources and AI processed items, sorted newest first
+    // Also filter out null/corrupted items (GraphQL returns null for items with missing required fields)
+    const processedItems = (data || [])
+      .filter((record): record is Record<string, unknown> => record !== null && record !== undefined)
+      .filter((record: Record<string, unknown>) => {
+        const hasRequired = record.id && record.title && record.sourceId && record.publishedAt;
+        const hasAiProcessed = !!record.aiProcessedAt;
+        const matchesSource = systemSourceIds.has(record.sourceId as string);
+        return hasRequired && hasAiProcessed && matchesSource;
+      })
+      .sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+        const dateA = new Date(a.publishedAt as string).getTime();
+        const dateB = new Date(b.publishedAt as string).getTime();
+        return dateB - dateA;
+      });
+
+    return processedItems.map((record: Record<string, unknown>) => ({
+      id: record.id as string,
+      title: record.title as string,
+      snippet: (record.content as string) || '',
+      url: record.url as string,
+      sourceId: record.sourceId as string,
+      sourceName: (record.sourceName as string) || 'Unknown',
+      sentiment: (record.sentiment as string) as Sentiment,
+      score: (record.sentimentScore as number) || 50,
+      importanceScore: (record.importanceScore as number) || undefined,
+      summary: (record.summary as string) || undefined,
+      publishedAt: record.publishedAt as string,
+      fetchedAt: record.fetchedAt as string,
+      tags: [],
+      category: (record.category as string) as Category,
+      storyGroupId: (record.storyGroupId as string) || undefined,
+      isHidden: false, // Public view doesn't have hidden state
+      seenAt: undefined, // Public view doesn't track read state
+    }));
+  },
+
   /**
    * List feed items for user's enabled subscriptions only.
    */
@@ -38,6 +116,7 @@ export const dataApi = {
       return [];
     }
 
+    const client = getClient();
     const { data, errors } = await client.models.FeedItem.list({
       limit: 500, // Fetch more since we'll filter client-side
     });
@@ -86,6 +165,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data, errors } = await client.models.UserPreferences.list();
 
     if (errors?.length) {
@@ -129,6 +209,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data: existing } = await client.models.UserPreferences.list();
     const record = (existing || [])[0] as Record<string, unknown> | undefined;
 
@@ -180,6 +261,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data, errors } = await client.models.FeedItem.list({
       filter: { sourceId: { eq: sourceId } },
       limit: 100,
@@ -220,6 +302,7 @@ export const dataApi = {
    * Mark a feed item as seen.
    */
   async markItemSeen(itemId: string): Promise<void> {
+    const client = getClient();
     const { errors } = await client.models.FeedItem.update({
       id: itemId,
       seenAt: new Date().toISOString(),
@@ -231,6 +314,7 @@ export const dataApi = {
    * Hide/unhide a feed item.
    */
   async setItemHidden(itemId: string, hidden: boolean): Promise<void> {
+    const client = getClient();
     const { errors } = await client.models.FeedItem.update({
       id: itemId,
       isHidden: hidden,
@@ -247,6 +331,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data, errors } = await client.models.Source.list();
 
     if (errors?.length) {
@@ -276,6 +361,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data, errors } = await client.models.Source.list({
       filter: { url: { eq: url } },
       limit: 1,
@@ -313,6 +399,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data, errors } = await client.models.UserSourceSubscription.list();
 
     if (errors?.length) {
@@ -337,6 +424,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data, errors } = await client.models.UserSourceSubscription.create({
       sourceId: source.id,
       isEnabled: true,
@@ -366,6 +454,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { data, errors } = await client.models.UserSourceSubscription.update({
       id,
       isEnabled,
@@ -392,6 +481,7 @@ export const dataApi = {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = getClient();
     const { errors } = await client.models.UserSourceSubscription.delete({ id });
     if (errors?.length) throw new Error(errors[0].message);
   },
@@ -404,6 +494,8 @@ export const dataApi = {
   async addCustomSource(url: string, name: string): Promise<{ source: Source; subscription: UserSourceSubscription }> {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
+
+    const client = getClient();
 
     // Check if source already exists
     let source = await this.getSourceByUrl(url);
@@ -457,6 +549,8 @@ export const dataApi = {
   async removeCustomSource(subscriptionId: string, sourceId: string): Promise<void> {
     const user = await authService.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
+
+    const client = getClient();
 
     // Delete subscription
     await this.deleteSubscription(subscriptionId);

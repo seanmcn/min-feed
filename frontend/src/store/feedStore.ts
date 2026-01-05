@@ -17,6 +17,9 @@ interface FeedState {
   // Data
   articles: Article[];
 
+  // Auth state
+  isAuthenticated: boolean;
+
   // Loading states
   isLoading: boolean;
   error: string | null;
@@ -32,6 +35,7 @@ interface FeedState {
   currentPage: number;
 
   // Actions
+  setAuthenticated: (isAuthenticated: boolean) => void;
   loadArticles: () => Promise<void>;
   markAsSeen: (id: string) => Promise<void>;
 
@@ -46,8 +50,9 @@ interface FeedState {
   resetFilters: () => void;
 }
 
-export const useFeedStore = create<FeedState>((set) => ({
+export const useFeedStore = create<FeedState>((set, get) => ({
   articles: [],
+  isAuthenticated: false,
   isLoading: false,
   error: null,
   sentimentFilters: [],
@@ -57,10 +62,18 @@ export const useFeedStore = create<FeedState>((set) => ({
   collapseDuplicates: getStoredCollapseDuplicates(),
   currentPage: 1,
 
+  setAuthenticated: (isAuthenticated: boolean) => {
+    set({ isAuthenticated });
+  },
+
   loadArticles: async () => {
     set({ isLoading: true, error: null });
     try {
-      const articles = await dataApi.listFeedItems();
+      const { isAuthenticated } = get();
+      // Use public API for unauthenticated users, authenticated API otherwise
+      const articles = isAuthenticated
+        ? await dataApi.listFeedItems()
+        : await dataApi.listPublicFeedItems();
       set({
         articles,
         isLoading: false,
@@ -74,6 +87,10 @@ export const useFeedStore = create<FeedState>((set) => ({
   },
 
   markAsSeen: async (id: string) => {
+    const { isAuthenticated } = get();
+    // Skip for unauthenticated users
+    if (!isAuthenticated) return;
+
     try {
       await dataApi.markItemSeen(id);
       // Update local state optimistically

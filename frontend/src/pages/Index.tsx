@@ -19,10 +19,12 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 interface IndexProps {
-  signOut: () => void;
+  signOut?: () => void;
+  onLogin?: () => void;
+  isAuthenticated?: boolean;
 }
 
-const Index = ({ signOut }: IndexProps) => {
+const Index = ({ signOut, onLogin, isAuthenticated = false }: IndexProps) => {
   const {
     articles,
     isLoading,
@@ -123,7 +125,7 @@ const Index = ({ signOut }: IndexProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header signOut={signOut} />
+      <Header signOut={signOut} onLogin={onLogin} isAuthenticated={isAuthenticated} />
       <Hero />
       <FilterBar
         categoryFilters={categoryFilters}
@@ -140,15 +142,17 @@ const Index = ({ signOut }: IndexProps) => {
           <div className="flex items-center gap-2">
             <VuMeterFilter />
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleShowHidden}
-              className={`gap-2 ${showHidden ? 'text-foreground' : 'text-muted-foreground'}`}
-            >
-              {showHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-              {showHidden ? 'Showing read' : 'Show read'}
-            </Button>
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleShowHidden}
+                className={`gap-2 ${showHidden ? 'text-foreground' : 'text-muted-foreground'}`}
+              >
+                {showHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                {showHidden ? 'Showing read' : 'Show read'}
+              </Button>
+            )}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
