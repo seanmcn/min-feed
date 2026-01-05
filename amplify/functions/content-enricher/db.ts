@@ -49,6 +49,11 @@ export async function getUnenrichedItems(
       );
 
       for (const item of response.Items || []) {
+        // Skip corrupted items missing required fields
+        if (!item.id || !item.url || !item.title) {
+          console.warn('Skipping item with missing required fields:', item.id);
+          continue;
+        }
         items.push({
           id: item.id as string,
           url: item.url as string,

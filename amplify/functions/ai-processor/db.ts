@@ -43,6 +43,11 @@ export async function getUnprocessedItems(
       );
 
       for (const item of response.Items || []) {
+        // Skip corrupted items missing required fields
+        if (!item.id || !item.title) {
+          console.warn('Skipping item with missing required fields:', item.id);
+          continue;
+        }
         items.push({
           id: item.id as string,
           title: item.title as string,
