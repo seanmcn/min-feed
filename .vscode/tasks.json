@@ -161,6 +161,16 @@
         "reveal": "always",
         "panel": "dedicated"
       }
+    },
+    {
+      "label": "Data: Seed System Sources",
+      "type": "shell",
+      "command": "FUNC=$(aws lambda list-functions --query \"Functions[?contains(FunctionName, 'sourceseeder')].FunctionName\" --output text) && echo \"Invoking $FUNC\" && aws lambda invoke --function-name $FUNC --payload '{}' /tmp/seeder-output.json && cat /tmp/seeder-output.json",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
     }
   ]
 }
