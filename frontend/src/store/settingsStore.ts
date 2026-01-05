@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { UserPreferences, Sentiment } from '@noise-gate/shared';
+import type { UserPreferences, Sentiment } from '@minfeed/shared';
 import { dataApi } from '@/lib/data-api';
 
 interface SettingsState {

@@ -4,4 +4,4 @@ export type {
   Category,
   Article,
   FilterState,
-} from '@noise-gate/shared';
+} from '@minfeed/shared';

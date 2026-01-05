@@ -1,4 +1,4 @@
-# NoiseGate
+# MinFeed
 
 An AI-assisted RSS content reader that filters, deduplicates, and sentiment-scores news from Reddit, BBC, and Hacker News.
 
@@ -54,7 +54,7 @@ This is a tool for catching up on news at your own pace.
 
 ## Self-Hosting
 
-NoiseGate is self-hosted using AWS Amplify. You'll need:
+MinFeed is self-hosted using AWS Amplify. You'll need:
 
 - Node.js 20+
 - An AWS account
@@ -96,7 +96,7 @@ If using VSCode, run tasks from the Command Palette (Cmd+Shift+P → "Tasks: Run
 ## Project Structure
 
 ```
-noise-gate/
+min-feed/
 ├── amplify/
 │   ├── auth/resource.ts           # Cognito email auth
 │   ├── data/resource.ts           # DynamoDB schema

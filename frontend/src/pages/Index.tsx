@@ -204,7 +204,7 @@ const Index = ({ signOut }: IndexProps) => {
       <footer className="border-t border-border/50 py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <p className="font-display text-sm text-muted-foreground">
-            <span className="text-gradient">NOISE</span>GATE — Filter the noise, find the signal
+            <span className="text-gradient">MIN</span>FEED — Filter the noise, find the signal
           </p>
         </div>
       </footer>

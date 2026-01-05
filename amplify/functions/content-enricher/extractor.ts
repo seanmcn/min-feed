@@ -38,7 +38,7 @@ export async function extractArticle(url: string): Promise<string> {
     const response = await fetch(url, {
       headers: {
         'User-Agent':
-          'NoiseGate/1.0 (Article Enricher; https://github.com/noise-gate)',
+          'MinFeed/1.0 (Article Enricher; https://github.com/seanmcn/min-feed)',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
       },

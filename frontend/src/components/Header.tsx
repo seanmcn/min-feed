@@ -15,8 +15,8 @@ export function Header({ signOut }: HeaderProps) {
             <div className="absolute inset-0 blur-lg bg-primary/30 animate-pulse-glow" />
           </div>
           <h1 className="font-display text-xl font-bold tracking-tight">
-            <span className="text-gradient">NOISE</span>
-            <span className="text-foreground">GATE</span>
+            <span className="text-gradient">MIN</span>
+            <span className="text-foreground">FEED</span>
           </h1>
         </Link>
 

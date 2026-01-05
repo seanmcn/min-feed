@@ -1,6 +1,6 @@
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../../amplify/data/resource';
-import type { Article, UserPreferences, Source, UserSourceSubscription, Sentiment, Category, SourceType } from '@noise-gate/shared';
+import type { Article, UserPreferences, Source, UserSourceSubscription, Sentiment, Category, SourceType } from '@minfeed/shared';
 import { authService } from './auth-service';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

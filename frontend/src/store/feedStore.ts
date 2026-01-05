@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Article, Sentiment, Category } from '@noise-gate/shared';
+import type { Article, Sentiment, Category } from '@minfeed/shared';
 import { dataApi } from '@/lib/data-api';
 
 export type SortOption = 'newest' | 'importance';

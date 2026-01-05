@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Source, UserSourceSubscription } from '@noise-gate/shared';
+import type { Source, UserSourceSubscription } from '@minfeed/shared';
 import { dataApi } from '@/lib/data-api';
 import { useFeedStore } from './feedStore';
 

@@ -20,7 +20,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@noise-gate/shared': path.resolve(__dirname, '../shared/src/index.ts'),
+      '@minfeed/shared': path.resolve(__dirname, '../shared/src/index.ts'),
     },
   },
 });

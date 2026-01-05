@@ -13,7 +13,7 @@ export interface RSSItem {
 export async function fetchAndParseRSS(feedUrl: string): Promise<RSSItem[]> {
   const response = await fetch(feedUrl, {
     headers: {
-      'User-Agent': 'NoiseGate/1.0 (RSS Aggregator)',
+      'User-Agent': 'MinFeed/1.0 (RSS Aggregator)',
       Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml',
     },
   });

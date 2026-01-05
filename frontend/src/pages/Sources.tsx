@@ -13,8 +13,8 @@ import {
 import { Header } from '@/components/Header';
 import { SourcePreviewDialog } from '@/components/SourcePreviewDialog';
 import { useSourcesStore } from '@/store/sourcesStore';
-import type { Source } from '@noise-gate/shared';
-import { formatRelativeTime } from '@noise-gate/shared';
+import type { Source } from '@minfeed/shared';
+import { formatRelativeTime } from '@minfeed/shared';
 
 // Source health status indicator
 function SourceHealthIndicator({ source }: { source: Source }) {

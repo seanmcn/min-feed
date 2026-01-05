@@ -49,7 +49,7 @@ export const handler: Handler = async (event): Promise<PreviewResponse> => {
 async function fetchAndParseRSS(feedUrl: string): Promise<PreviewItem[]> {
   const response = await fetch(feedUrl, {
     headers: {
-      'User-Agent': 'NoiseGate/1.0 (RSS Aggregator)',
+      'User-Agent': 'MinFeed/1.0 (RSS Aggregator)',
       Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml',
     },
   });

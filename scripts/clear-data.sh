@@ -1,10 +1,10 @@
 #!/bin/bash
-# Clear all data from NoiseGate DynamoDB tables (sandbox)
+# Clear all data from MinFeed DynamoDB tables (sandbox)
 # This deletes FeedItem, StoryGroup, Feed, and UserPreferences data
 
 set -e
 
-echo "Finding NoiseGate tables..."
+echo "Finding MinFeed tables..."
 
 # Find tables dynamically - they have unique sandbox suffixes
 # Use awk to get just the first table name (AWS returns tab-separated)

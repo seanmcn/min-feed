@@ -1,6 +1,6 @@
 import { Smile, Meh, Frown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Sentiment } from '@noise-gate/shared';
+import type { Sentiment } from '@minfeed/shared';
 import { useFeedStore } from '@/store/feedStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import {

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { Source, Article } from '@noise-gate/shared';
+import type { Source, Article } from '@minfeed/shared';
 import { dataApi } from '@/lib/data-api';
 import { formatDistanceToNow } from 'date-fns';
 
