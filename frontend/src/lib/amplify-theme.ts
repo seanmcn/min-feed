@@ -73,7 +73,6 @@ export const authTheme = createTheme({
         },
       },
       fieldcontrol: {
-        backgroundColor: { value: 'hsl(220 15% 18%)' },
         borderColor: { value: 'hsl(220 15% 20%)' },
         color: { value: 'hsl(210 20% 95%)' },
         _focus: {

@@ -169,3 +169,9 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 }
+
+/* Amplify UI field control styling */
+.amplify-input,
+.amplify-field-group__control {
+  background-color: hsl(220 15% 18%);
+}
