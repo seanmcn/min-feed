@@ -40,12 +40,16 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
     collapseDuplicates,
     timeRange,
     currentPage,
+    viewMode,
+    activeListId,
     toggleCategory,
     toggleShowHidden,
     setSortBy,
     setTimeRange: setFeedTimeRange,
     setPage,
     markAsSeen,
+    setViewMode,
+    selectList,
   } = useFeedStore();
 
   const { preferences, setTimeRange: setPreferencesTimeRange } = useSettingsStore();
@@ -61,6 +65,15 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
   );
 
   const blockedWords = useMemo(() => preferences?.blockedWords ?? [], [preferences?.blockedWords]);
+  const excludedCategories = useMemo(() => preferences?.excludedCategories ?? [], [preferences?.excludedCategories]);
+  const customLists = useMemo(() => preferences?.customLists ?? [], [preferences?.customLists]);
+
+  // Get the active list's categories
+  const activeListCategories = useMemo(() => {
+    if (viewMode !== 'lists' || !activeListId) return null;
+    const list = customLists.find((l) => l.id === activeListId);
+    return list?.categories ?? null;
+  }, [viewMode, activeListId, customLists]);
 
   // Helper to get time range boundaries
   const getTimeRangeBoundary = useCallback((range: TimeRange): Date => {
@@ -125,8 +138,20 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
       const publishedDate = new Date(article.publishedAt);
       if (publishedDate < timeRangeBoundary) return false;
 
+      // ALWAYS apply exclusions (stacks with everything)
+      if (excludedCategories.includes(article.category)) return false;
+
       if (sentimentFilters.length > 0 && !sentimentFilters.includes(article.sentiment)) return false;
-      if (categoryFilters.length > 0 && !categoryFilters.includes(article.category)) return false;
+
+      // Category filtering: depends on view mode
+      if (activeListCategories) {
+        // In list mode with active list: filter to list's categories
+        if (!activeListCategories.includes(article.category)) return false;
+      } else if (categoryFilters.length > 0) {
+        // In categories mode: use existing categoryFilters
+        if (!categoryFilters.includes(article.category)) return false;
+      }
+
       const content = `${article.title} ${article.snippet}`.toLowerCase();
       for (const word of blockedWords) {
         if (content.includes(word.toLowerCase())) return false;
@@ -163,7 +188,7 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
     }
 
     return sorted;
-  }, [articles, sentimentFilters, categoryFilters, blockedWords, showHidden, sortBy, collapseDuplicates, timeRange, getTimeRangeBoundary]);
+  }, [articles, sentimentFilters, categoryFilters, blockedWords, showHidden, sortBy, collapseDuplicates, timeRange, getTimeRangeBoundary, excludedCategories, activeListCategories]);
 
   const visibleCount = filteredArticles.length;
   const totalPages = Math.ceil(visibleCount / pageSize);
@@ -188,6 +213,13 @@ const Index = ({ signOut, isAuthenticated = false }: IndexProps) => {
         <FilterBar
           categoryFilters={categoryFilters}
           onCategoryToggle={toggleCategory}
+          excludedCategories={excludedCategories}
+          customLists={customLists}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          activeListId={activeListId}
+          onListSelect={selectList}
+          isAuthenticated={isAuthenticated}
         />
       </div>
 

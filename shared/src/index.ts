@@ -20,6 +20,15 @@ export type Category =
   | 'politics'
   | 'other';
 
+// Custom list type (a named set of categories)
+export interface CustomList {
+  id: string;
+  name: string;
+  categories: Category[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Article interface (for frontend display)
 export interface Article {
   id: string;
@@ -51,6 +60,8 @@ export interface UserPreferences {
   sentimentFilters: Sentiment[]; // Active sentiment filters (empty = show all)
   timeRange: TimeRange; // Time range filter for feed
   customSourceLimit: number; // Paid feature stub
+  excludedCategories: Category[]; // Categories to always hide
+  customLists: CustomList[]; // User-defined category lists
   createdAt: string;
   updatedAt: string;
 }

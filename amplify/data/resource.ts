@@ -148,6 +148,9 @@ const schema = a.schema({
       timeRange: a.enum(['today', 'yesterday', 'last7days', 'last14days']),
       // Paid feature stub
       customSourceLimit: a.integer().default(3),
+      // Category management
+      excludedCategories: a.json(), // Categories to always hide
+      customLists: a.json(), // User-defined category lists
     })
     .authorization((allow) => [allow.owner()]),
 });

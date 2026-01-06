@@ -23,6 +23,7 @@ import {
 interface CategoryFilterProps {
   activeCategories: Category[];
   onToggle: (category: Category) => void;
+  excludedCategories?: Category[];
 }
 
 interface CategoryItem {
@@ -80,8 +81,16 @@ const categoryGroups: CategoryGroup[] = [
   },
 ];
 
-export function CategoryFilter({ activeCategories, onToggle }: CategoryFilterProps) {
+export function CategoryFilter({ activeCategories, onToggle, excludedCategories = [] }: CategoryFilterProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Filter groups to exclude hidden categories
+  const filteredGroups = categoryGroups
+    .map((group) => ({
+      ...group,
+      categories: group.categories.filter((cat) => !excludedCategories.includes(cat.value)),
+    }))
+    .filter((group) => group.categories.length > 0);
 
   const toggleGroup = (group: CategoryGroup) => {
     const isExpanded = expandedGroups.has(group.name);
@@ -100,7 +109,7 @@ export function CategoryFilter({ activeCategories, onToggle }: CategoryFilterPro
 
     // Deselect all categories from any currently expanded groups
     for (const expandedName of expandedGroups) {
-      const expandedGroup = categoryGroups.find((g) => g.name === expandedName);
+      const expandedGroup = filteredGroups.find((g) => g.name === expandedName);
       if (expandedGroup) {
         for (const cat of expandedGroup.categories) {
           if (activeCategories.includes(cat.value)) {
@@ -111,7 +120,7 @@ export function CategoryFilter({ activeCategories, onToggle }: CategoryFilterPro
     }
 
     // Also deselect any single-category groups that are active
-    for (const otherGroup of categoryGroups) {
+    for (const otherGroup of filteredGroups) {
       if (otherGroup.categories.length === 1 && otherGroup.name !== group.name) {
         const cat = otherGroup.categories[0];
         if (activeCategories.includes(cat.value)) {
@@ -143,7 +152,7 @@ export function CategoryFilter({ activeCategories, onToggle }: CategoryFilterPro
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
-        {categoryGroups.map((group) => {
+        {filteredGroups.map((group) => {
           const isExpanded = expandedGroups.has(group.name);
           const isActive = isGroupActive(group);
           const Icon = group.icon;
@@ -157,7 +166,7 @@ export function CategoryFilter({ activeCategories, onToggle }: CategoryFilterPro
             const handleSingleCategoryClick = () => {
               // Collapse and deselect any expanded groups first
               for (const expandedName of expandedGroups) {
-                const expandedGroup = categoryGroups.find((g) => g.name === expandedName);
+                const expandedGroup = filteredGroups.find((g) => g.name === expandedName);
                 if (expandedGroup) {
                   for (const cat of expandedGroup.categories) {
                     if (activeCategories.includes(cat.value)) {
@@ -216,7 +225,7 @@ export function CategoryFilter({ activeCategories, onToggle }: CategoryFilterPro
       </div>
 
       {/* Expanded categories */}
-      {categoryGroups.map((group) => {
+      {filteredGroups.map((group) => {
         if (!expandedGroups.has(group.name)) return null;
 
         const selectSingleCategory = (selectedValue: Category) => {

@@ -1,6 +1,6 @@
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../../amplify/data/resource';
-import type { Article, UserPreferences, Source, UserSourceSubscription, Sentiment, Category, SourceType, TimeRange } from '@minfeed/shared';
+import type { Article, UserPreferences, Source, UserSourceSubscription, Sentiment, Category, SourceType, TimeRange, CustomList } from '@minfeed/shared';
 import { authService } from './auth-service';
 
 // Lazy-initialized clients (created after Amplify is configured)
@@ -184,6 +184,8 @@ export const dataApi = {
         sentimentFilters: parseJsonField<Sentiment[]>(record.sentimentFilters, []),
         timeRange: (record.timeRange as TimeRange) || 'today',
         customSourceLimit: (record.customSourceLimit as number) || 3,
+        excludedCategories: parseJsonField<Category[]>(record.excludedCategories, []),
+        customLists: parseJsonField<CustomList[]>(record.customLists, []),
         createdAt: record.createdAt as string,
         updatedAt: record.updatedAt as string,
       };
@@ -199,6 +201,8 @@ export const dataApi = {
       sentimentFilters: [],
       timeRange: 'today',
       customSourceLimit: 3,
+      excludedCategories: [],
+      customLists: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -225,6 +229,8 @@ export const dataApi = {
         articlesPerPage: prefs.articlesPerPage,
         sentimentFilters: JSON.stringify(prefs.sentimentFilters),
         timeRange: prefs.timeRange,
+        excludedCategories: JSON.stringify(prefs.excludedCategories),
+        customLists: JSON.stringify(prefs.customLists),
       });
       if (errors?.length) throw new Error(errors[0].message);
       result = data;
@@ -236,6 +242,8 @@ export const dataApi = {
         articlesPerPage: prefs.articlesPerPage,
         sentimentFilters: JSON.stringify(prefs.sentimentFilters),
         timeRange: prefs.timeRange,
+        excludedCategories: JSON.stringify(prefs.excludedCategories),
+        customLists: JSON.stringify(prefs.customLists),
       });
       if (errors?.length) throw new Error(errors[0].message);
       result = data;
@@ -254,6 +262,8 @@ export const dataApi = {
       sentimentFilters: parseJsonField<Sentiment[]>(result.sentimentFilters, []),
       timeRange: (result.timeRange as TimeRange) || 'today',
       customSourceLimit: (result.customSourceLimit as number) || 3,
+      excludedCategories: parseJsonField<Category[]>(result.excludedCategories, []),
+      customLists: parseJsonField<CustomList[]>(result.customLists, []),
       createdAt: result.createdAt as string,
       updatedAt: result.updatedAt as string,
     };

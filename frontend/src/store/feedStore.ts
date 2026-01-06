@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Article, Sentiment, Category, TimeRange } from '@minfeed/shared';
 
 export type SortOption = 'newest' | 'importance';
+export type ViewMode = 'categories' | 'lists';
 export type { TimeRange };
 
 // Load collapseDuplicates from localStorage
@@ -45,6 +46,10 @@ interface FeedState {
   collapseDuplicates: boolean;
   timeRange: TimeRange;
 
+  // List mode state
+  viewMode: ViewMode;
+  activeListId: string | null;
+
   // Pagination
   currentPage: number;
 
@@ -67,6 +72,10 @@ interface FeedState {
   setTimeRange: (range: TimeRange) => void;
   setPage: (page: number) => void;
   resetFilters: () => void;
+
+  // List mode actions
+  setViewMode: (mode: ViewMode) => void;
+  selectList: (listId: string | null) => void;
 }
 
 export const useFeedStore = create<FeedState>((set) => ({
@@ -80,6 +89,8 @@ export const useFeedStore = create<FeedState>((set) => ({
   sortBy: 'newest',
   collapseDuplicates: getStoredCollapseDuplicates(),
   timeRange: getStoredTimeRange(),
+  viewMode: 'categories',
+  activeListId: null,
   currentPage: 1,
 
   // Data actions (synced from React Query)
@@ -167,7 +178,22 @@ export const useFeedStore = create<FeedState>((set) => ({
       showHidden: false,
       sortBy: 'newest',
       timeRange: 'today',
+      viewMode: 'categories',
+      activeListId: null,
       currentPage: 1,
     });
+  },
+
+  setViewMode: (mode) => {
+    set({
+      viewMode: mode,
+      // Clear active list when switching to categories mode
+      activeListId: mode === 'categories' ? null : undefined,
+      currentPage: 1,
+    });
+  },
+
+  selectList: (listId) => {
+    set({ activeListId: listId, currentPage: 1 });
   },
 }));

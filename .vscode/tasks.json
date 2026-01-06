@@ -37,6 +37,21 @@
       }
     },
     {
+      "label": "Sandbox: Restart",
+      "type": "shell",
+      "command": "pkill -f 'ampx sandbox' || true; sleep 1; ./scripts/set-secrets.sh && npx ampx sandbox --outputs-out-dir frontend/public",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    },
+    {
       "label": "Sandbox: Reset (Delete & Restart)",
       "type": "shell",
       "command": "npx ampx sandbox delete -y && ./scripts/set-secrets.sh && npx ampx sandbox --outputs-out-dir frontend/public",
