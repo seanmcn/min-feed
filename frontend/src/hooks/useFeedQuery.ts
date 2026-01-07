@@ -20,6 +20,10 @@ export function useFeedQuery(isAuthenticated: boolean) {
         ? await dataApi.listFeedItems()
         : await dataApi.listPublicFeedItems();
     },
+    refetchInterval: isAuthenticated
+      ? 2 * 60 * 1000 // Authenticated: poll every 2 minutes
+      : 10 * 60 * 1000, // Public: poll every 10 minutes
+    refetchIntervalInBackground: false, // Pause polling when tab is hidden
   });
 }
 
